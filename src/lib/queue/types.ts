@@ -5,6 +5,7 @@ export type TicketStatus = "waiting" | "called" | "served" | "skipped";
 export interface Queue {
   id: string;
   context: string;
+  teacherName: string;
   status: QueueStatus;
   teacherId: string;
   mode: TeacherMode;

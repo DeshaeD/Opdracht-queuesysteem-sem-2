@@ -3,6 +3,12 @@ import { openQueueSchema } from "@/lib/queue/schemas";
 import { assertTeacherAccess } from "@/lib/queue/security";
 import { queueStore } from "@/lib/queue/store";
 
+export async function GET(): Promise<NextResponse> {
+  const queues = queueStore.listQueues();
+
+  return NextResponse.json({ queues });
+}
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const auth = assertTeacherAccess(request);
 
@@ -21,7 +27,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const queue = queueStore.openQueue(parsedBody.data.queueId, parsedBody.data.context, auth.teacherId);
+    const queue = queueStore.openQueue(
+      parsedBody.data.queueId,
+      parsedBody.data.context,
+      auth.teacherId,
+      parsedBody.data.teacherName,
+    );
 
     return NextResponse.json({ queue }, { status: 201 });
   } catch (error) {

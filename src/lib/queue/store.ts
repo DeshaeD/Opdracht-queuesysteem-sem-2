@@ -9,7 +9,7 @@ interface QueueSnapshot {
 class InMemoryQueueStore {
   private readonly queues = new Map<string, QueueSnapshot>();
 
-  openQueue(queueId: string, context: string, teacherId: string): Queue {
+  openQueue(queueId: string, context: string, teacherId: string, teacherName: string): Queue {
     if (this.queues.has(queueId)) {
       throw new Error("Queue already exists.");
     }
@@ -18,6 +18,7 @@ class InMemoryQueueStore {
     const queue: Queue = {
       id: queueId,
       context,
+      teacherName,
       status: "open",
       teacherId,
       mode: "active",
@@ -28,9 +29,19 @@ class InMemoryQueueStore {
     };
 
     this.queues.set(queueId, { queue, tickets: [] });
-    this.publish("QueueOpened", queueId, { context, teacherId });
+    this.publish("QueueOpened", queueId, { context, teacherId, teacherName });
 
     return queue;
+  }
+
+  listQueues(): Array<Queue & { waitingCount: number }> {
+    return Array.from(this.queues.values())
+      .filter(({ queue }) => queue.status !== "closed")
+      .map(({ queue, tickets }) => ({
+        ...queue,
+        waitingCount: tickets.filter((ticket) => ticket.status === "waiting").length,
+      }))
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   }
 
   closeQueue(queueId: string): Queue {

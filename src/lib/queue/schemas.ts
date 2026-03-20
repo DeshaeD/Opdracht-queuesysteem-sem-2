@@ -6,6 +6,7 @@ export const studentIdSchema = z.string().trim().min(3).max(64).regex(/^[a-zA-Z0
 export const openQueueSchema = z.object({
   queueId: queueIdSchema,
   context: z.string().trim().min(3).max(120),
+  teacherName: z.string().trim().min(2).max(60),
 });
 
 export const joinQueueSchema = z.object({
